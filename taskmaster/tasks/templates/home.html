@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Планировщик задач</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="menu">
+            <h2>Списки</h2>
+            <ul>
+                {% for project in projects %}
+                    <li>{{ project.name }}</li>
+                {% endfor %}
+            </ul>
+            <a href="{% url 'add_project' %}" class="btn">Добавить проект</a>
+        </div>
+    </div>
+    <div class="content">
+        <h1>Сегодня</h1>
+        <ul>
+            {% for task in tasks %}
+                <li>{{ task.name }} - {{ task.due_date }}</li>
+            {% endfor %}
+        </ul>
+        {% if not tasks %}
+            <p>Никаких задач на сегодня. Наслаждайтесь вечером.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
