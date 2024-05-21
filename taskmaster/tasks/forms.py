@@ -31,19 +31,20 @@ class CustomUserChangeForm(UserChangeForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'description', 'email']
+        fields = ['name', 'description', 'users']
 
     def __init__(self, *args, **kwargs):
         super(ProjectForm, self).__init__(*args, **kwargs)
-        self.fields['email'].queryset = CustomUser.objects.filter(is_active=True)
+        self.fields['users'].queryset = CustomUser.objects.filter(is_active=True)
 
 
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'priority', 'status', 'project', 'assigned_to']
+        fields = ['title', 'description', 'priority', 'project', 'assigned_to']
 
     def __init__(self, *args, **kwargs):
-        super(TaskForm, self).__init__(*args, **kwargs)
-        self.fields['project'].queryset = Project.objects.filter(email__is_active=True)
-        self.fields['assigned_to'].queryset = CustomUser.objects.filter(is_active=True)
+        project = kwargs.pop('project', None)
+        super().__init__(*args, **kwargs)
+        if project:
+            self.fields['assigned_to'].queryset = CustomUser.objects.filter(projects=project)

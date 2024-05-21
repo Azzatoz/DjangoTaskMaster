@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Проект {{ project.name }}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .task-details {
+            display: none;
+        }
+    </style>
+    <script>
+        function toggleDetails(taskId) {
+            var details = document.getElementById('details-' + taskId);
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+            } else {
+                details.style.display = 'none';
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Проект: {{ project.name }}</h1>
+        <p>{{ project.description }}</p>
+        <p>Дата создания: {{ project.date_created }}</p>
+        <p>Обновлено: {{ project.updated_at }}</p>
+        <h2>Задачи</h2>
+        <ul>
+            {% for task in project.tasks.all %}
+                <li>
+                    <button onclick="toggleDetails('{{ task.id }}')">
+                        {{ task.title }} - {{ task.due_date }}
+                    </button>
+                    <div id="details-{{ task.id }}" class="task-details">
+                        <p><strong>Описание:</strong> {{ task.description }}</p>
+                        <p><strong>Приоритет:</strong> {{ task.priority }}</p>
+                        <p><strong>Статус:</strong> {% if task.completed %}завершен{% else %}не завершен{% endif %}</p>
+                        <p><strong>Добавил:</strong> {{ task.created_by }}</p>
+                        <p><strong>Дата создания:</strong> {{ task.date_created }}</p>
+                        <p><strong>Обновлено:</strong> {{ task.updated_at }}</p>
+                        <a href="{% url 'edit_task' task.id %}" class="btn">Редактировать</a>
+                        <form method="post" action="{% url 'mark_task_completed' task.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">
+                                {% if task.completed %}Отметить как не выполненную{% else %}Отметить как выполненную{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+        {% if not project.completed %}
+            <a href="{% url 'add_task' project.id %}" class="btn">Добавить задачу</a>
+        {% else %}
+            <p>Проект завершен, добавление задач недоступно</p>
+        {% endif %}
+        <a href="{% url 'home' %}" class="btn">Назад к списку проектов</a>
+        <h2>Участники</h2>
+        <ul>
+            {% for user in project.users.all %}
+                <li>{{ user.username }}</li>
+            {% endfor %}
+        </ul>
+        <form method="post" action="{% url 'add_user_to_project' project.id %}">
+            {% csrf_token %}
+            <label for="username">Добавить пользователя:</label>
+            <input type="text" id="username" name="username">
+            <button type="submit" class="btn">Добавить</button>
+        </form>
+        <a href="{% url 'edit_project' project.id %}" class="btn">Редактировать проект</a>
+        <form method="post" action="{% url 'mark_project_completed' project.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn">
+                {% if project.completed %}Отметить как не выполненный{% else %}Отметить проект как выполненный{% endif %}
+            </button>
+        </form>
+    </div>
+</body>
+</html>
