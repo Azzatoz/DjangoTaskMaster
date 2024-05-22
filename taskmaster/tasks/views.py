@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from .forms import SignUpForm, SignInForm, ProjectForm, TaskForm
-from .models import Project, Task, CustomUser
+from .forms import SignUpForm, SignInForm, ProjectForm, TaskForm, TaskFilterForm
+from .models import Project, ProjectRole, Task, CustomUser
+from django.contrib.auth.models import User
 
 
 @login_required
@@ -16,19 +17,22 @@ def home(request):
     })
 
 
-@login_required
 def project_detail(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-    if request.method == 'POST':
-        form = TaskForm(request.POST, project=project)
-        if form.is_valid():
-            task = form.save(commit=False)
-            task.project = project
-            task.save()
-            return redirect('project_detail', project_id=project.id)
-    else:
-        form = TaskForm(project=project)
-    return render(request, 'project_detail.html', {'form': form, 'project': project})
+    tasks = project.tasks.all()
+    roles = ProjectRole.objects.filter(project=project)
+    form = TaskFilterForm(request.GET or None)
+
+    if form.is_valid():
+        if form.cleaned_data['search']:
+            tasks = tasks.filter(title__icontains=form.cleaned_data['search'])
+
+    return render(request, 'project_detail.html', {
+        'project': project,
+        'tasks': tasks,
+        'roles': roles,
+        'form': form,
+    })
 
 
 @login_required
@@ -70,13 +74,26 @@ def mark_project_completed(request, project_id):
     return redirect('project_detail', project_id=project.id)
 
 
+@login_required
 def add_user_to_project(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     if request.method == 'POST':
         username = request.POST.get('username')
-        user = get_object_or_404(CustomUser, username=username)
-        project.users.add(user)
+        role = request.POST.get('role', 'executor')
+        user = get_object_or_404(User, username=username)
+        ProjectRole.objects.get_or_create(project=project, user=user, defaults={'role': role})
         return redirect('project_detail', project_id=project.id)
+    return redirect('project_detail', project_id=project.id)
+
+
+@login_required
+def remove_user_from_project(request, project_id, user_id):
+    project = get_object_or_404(Project, id=project_id)
+    user = get_object_or_404(User, id=user_id)
+    if project.owner == user:
+        # Нельзя удалить владельца проекта
+        return redirect('project_detail', project_id=project.id)
+    ProjectRole.objects.filter(project=project, user=user).delete()
     return redirect('project_detail', project_id=project.id)
 
 
@@ -87,11 +104,13 @@ def add_task(request, project_id):
         return redirect('project_detail', project_id=project.id)
 
     if request.method == 'POST':
-        form = TaskForm(request.POST)
+        form = TaskForm(request.POST, project=project)
         if form.is_valid():
             task = form.save(commit=False)
             task.project = project
-            task.completed = True
+            if not task.assigned_to:
+                task.assigned_to = request.user
+            task.completed = False
             task.created_by = request.user
             task.save()
             return redirect('project_detail', project_id=project.id)
@@ -114,9 +133,20 @@ def edit_task(request, task_id):
 
 
 @login_required
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    project_id = task.project.id
+    task.delete()
+    return redirect('project_detail', project_id=project_id)
+
+
+@login_required
 def mark_task_completed(request, task_id):
     task = get_object_or_404(Task, id=task_id)
-    task.completed = True
+    if task.completed:
+        task.completed = False
+    else:
+        task.completed = True
     task.save()
     return redirect('project_detail', project_id=task.project.id)
 

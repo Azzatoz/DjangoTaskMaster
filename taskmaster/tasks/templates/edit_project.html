@@ -3,19 +3,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактировать проект</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/add_project_or_task.css' %}">
 </head>
-
 <body>
     <div class="container">
         <h1>Редактировать проект: {{ project.name }}</h1>
-        <form method="post">
+        <form method="post" class="form">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="btn">Сохранить</button>
+            <button type="submit" class="btn-back">Сохранить</button>
         </form>
-        <a href="{% url 'project_detail' project.id %}">Назад</a>
+        <a href="{% url 'project_detail' project.id %}" class="btn-back">Назад</a>
     </div>
 </body>
 </html>

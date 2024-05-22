@@ -4,7 +4,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Планировщик задач</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <script>
+    function toggleNotifications() {
+        document.getElementById("notificationDropdown").classList.toggle("show");
+    }
+
+    window.onclick = function(event) {
+        if (!event.target.matches('.notification-btn')) {
+            var dropdowns = document.getElementsByClassName("notification-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+    </script>
 </head>
 <body>
     <div class="navbar">
@@ -13,26 +30,28 @@
                 <span>{{ request.user.username }}</span>
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn">Выйти</button>
+                    <button type="submit" class="btn btn-logout">Выйти</button>
                 </form>
+                <div class="notification">
+                    <button onclick="toggleNotifications()" class="btn notification-btn">
+                        Уведомления <span class="badge">3</span>
+                    </button>
+                    <div id="notificationDropdown" class="notification-content">
+                        <a href="#">Вас добавили в проект</a>
+                        <a href="#">Вас выгнали из проекта</a>
+                        <a href="#">Вы просрочили задачу</a>
+                        <a href="#">Сегодня нужно выполнить задачу</a>
+                        <a href="#">Для вас назначили задачу</a>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="sidebar">
-        <div class="menu">
-            <h2>Списки</h2>
-            <ul>
-                {% for project in incomplete_projects %}
-                    <li><a href="{% url 'project_detail' project.id %}">{{ project.name }}</a></li>
-                {% endfor %}
-            </ul>
-            <a href="{% url 'add_project' %}" class="btn btn-add">Добавить проект</a>
         </div>
     </div>
     <div class="content">
         <div class="projects">
             <div class="incomplete-projects">
                 <h1>Незавершённые проекты</h1>
+                <a href="{% url 'add_project' %}" class="btn btn-add">Добавить проект</a>
                 <ul class="project-list">
                     {% for project in incomplete_projects %}
                         <li>

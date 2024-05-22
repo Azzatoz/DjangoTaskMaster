@@ -8,7 +8,7 @@ class SignUpForm(UserCreationForm):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'role', 'password1', 'password2')
+        fields = ('username', 'email', 'password1', 'password2')
 
 
 class SignInForm(forms.Form):
@@ -31,20 +31,28 @@ class CustomUserChangeForm(UserChangeForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'description', 'users']
-
-    def __init__(self, *args, **kwargs):
-        super(ProjectForm, self).__init__(*args, **kwargs)
-        self.fields['users'].queryset = CustomUser.objects.filter(is_active=True)
+        fields = ['name', 'description']
 
 
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'priority', 'project', 'assigned_to']
+        fields = ['title', 'description', 'priority', 'due_date', 'assigned_to']
+        widgets = {
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
+        }
 
     def __init__(self, *args, **kwargs):
         project = kwargs.pop('project', None)
         super().__init__(*args, **kwargs)
         if project:
             self.fields['assigned_to'].queryset = CustomUser.objects.filter(projects=project)
+            self.fields['assigned_to'].label_from_instance = lambda obj: f'{obj.username}'
+
+
+class TaskFilterForm(forms.Form):
+    search = forms.CharField(required=False, label='Название задачи')
+    status = forms.ChoiceField(required=False, choices=[('', 'Любой'), ('completed', 'Завершенные'), ('not_completed', 'Не завершенные')], label='Статус')
+    priority = forms.ChoiceField(required=False, choices=[('', 'Любой'), (1, 'Низкий'), (2, 'Средний'), (3, 'Высокий')], label='Приоритет')
+    due_date_from = forms.DateField(required=False, widget=forms.TextInput(attrs={'type': 'date'}), label='Срок выполнения (с)')
+    due_date_to = forms.DateField(required=False, widget=forms.TextInput(attrs={'type': 'date'}), label='Срок выполнения (по)')

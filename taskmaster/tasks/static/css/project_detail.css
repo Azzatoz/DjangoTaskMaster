@@ -1,0 +1,118 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+}
+
+.completed {
+    background-color: #e6ffe6;
+}
+
+.incomplete {
+    background-color: #ffe6e6;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+}
+
+header nav {
+    display: flex;
+    justify-content: flex-start;
+}
+
+header nav .btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+header nav .btn:hover {
+    background-color: #0056b3;
+}
+
+.project-info, .tasks, .project-users, .project-actions {
+    margin-bottom: 20px;
+}
+
+h1, h2 {
+    border-bottom: 2px solid #343a40;
+    padding-bottom: 5px;
+}
+
+.task-item {
+    margin-bottom: 15px;
+}
+
+.task-title {
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    padding: 10px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.task-details {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    display: none;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.btn-remove {
+    background-color: #dc3545;
+}
+
+.btn-remove:hover {
+    background-color: #c82333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.add-task {
+    background-color: #28a745;
+}
+
+.add-task:hover {
+    background-color: #218838;
+}

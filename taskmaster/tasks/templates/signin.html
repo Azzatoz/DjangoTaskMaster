@@ -8,11 +8,17 @@
     <title>Вход</title>
 </head>
 <body>
-    <h2>Вход</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Войти</button>
-    </form>
+    <div class="container">
+        <div class="form-container">
+            <h2>Вход</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn">Войти</button>
+            </form>
+            <p>Ещё нет аккаунта? <a href="{% url 'signup' %}">Зарегистрироваться</a></p>
+            <p><a href="{% url 'password_reset' %}">Забыл пароль?</a></p>
+        </div>
+    </div>
 </body>
 </html>

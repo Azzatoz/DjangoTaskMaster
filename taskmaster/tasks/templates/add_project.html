@@ -4,16 +4,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <title>Проекты</title>
+    <link rel="stylesheet" href="{% static 'css/add_project_or_task.css' %}">
+    <title>Добавить проект</title>
 </head>
 <body>
-    <h1>Добавить проект</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Сохранить</button>
-    </form>
-    <a href="{% url 'home' %}">Назад</a>
+    <div class="container">
+        <h1>Добавить проект</h1>
+        <form method="post" class="form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn">Сохранить</button>
+        </form>
+        <a href="{% url 'home' %}" class="btn-back">Назад</a>
+    </div>
 </body>
 </html>
