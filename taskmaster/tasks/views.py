@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import SignUpForm, SignInForm, ProjectForm, TaskForm, TaskFilterForm
 from .models import Project, ProjectRole, Task, CustomUser
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 
 @login_required
@@ -41,8 +41,9 @@ def add_project(request):
         form = ProjectForm(request.POST)
         if form.is_valid():
             project = form.save(commit=False)
-            project.created_by = request.user
+            project.owner = request.user
             project.save()
+            project.users.add(request.user, through_defaults={'role': 'owner'})
             return redirect('project_detail', project_id=project.id)
     else:
         form = ProjectForm()
@@ -80,7 +81,7 @@ def add_user_to_project(request, project_id):
     if request.method == 'POST':
         username = request.POST.get('username')
         role = request.POST.get('role', 'executor')
-        user = get_object_or_404(User, username=username)
+        user = get_object_or_404(get_user_model(), username=username)
         ProjectRole.objects.get_or_create(project=project, user=user, defaults={'role': role})
         return redirect('project_detail', project_id=project.id)
     return redirect('project_detail', project_id=project.id)
@@ -89,7 +90,7 @@ def add_user_to_project(request, project_id):
 @login_required
 def remove_user_from_project(request, project_id, user_id):
     project = get_object_or_404(Project, id=project_id)
-    user = get_object_or_404(User, id=user_id)
+    user = get_object_or_404(get_user_model(), id=user_id)
     if project.owner == user:
         # Нельзя удалить владельца проекта
         return redirect('project_detail', project_id=project.id)
