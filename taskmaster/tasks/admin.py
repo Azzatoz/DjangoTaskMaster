@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Project, ProjectRole, Task
+from .models import CustomUser, Project, ProjectRole, Task, Notification
 from django.contrib.auth.admin import UserAdmin
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
@@ -15,3 +15,4 @@ admin.site.register(CustomUser, CustomUserAdmin)
 admin.site.register(Project)
 admin.site.register(ProjectRole)
 admin.site.register(Task)
+admin.site.register(Notification)

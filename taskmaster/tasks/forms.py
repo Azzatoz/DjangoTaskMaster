@@ -28,6 +28,12 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ('username', 'email', 'role')
 
 
+class PasswordResetForm(forms.Form):
+    username = forms.CharField(max_length=150, label='Имя пользователя')
+    email = forms.EmailField(label='Email')
+    new_password = forms.CharField(widget=forms.PasswordInput, label='Новый пароль')
+
+
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
@@ -35,6 +41,12 @@ class ProjectForm(forms.ModelForm):
 
 
 class TaskForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        project = kwargs.pop('project', None)
+        super(TaskForm, self).__init__(*args, **kwargs)
+        if project:
+            self.fields['assigned_to'].queryset = project.users.all()
+
     class Meta:
         model = Task
         fields = ['title', 'description', 'priority', 'due_date', 'assigned_to']
@@ -42,17 +54,14 @@ class TaskForm(forms.ModelForm):
             'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        project = kwargs.pop('project', None)
-        super().__init__(*args, **kwargs)
-        if project:
-            self.fields['assigned_to'].queryset = CustomUser.objects.filter(projects=project)
-            self.fields['assigned_to'].label_from_instance = lambda obj: f'{obj.username}'
-
 
 class TaskFilterForm(forms.Form):
     search = forms.CharField(required=False, label='Название задачи')
-    status = forms.ChoiceField(required=False, choices=[('', 'Любой'), ('completed', 'Завершенные'), ('not_completed', 'Не завершенные')], label='Статус')
-    priority = forms.ChoiceField(required=False, choices=[('', 'Любой'), (1, 'Низкий'), (2, 'Средний'), (3, 'Высокий')], label='Приоритет')
-    due_date_from = forms.DateField(required=False, widget=forms.TextInput(attrs={'type': 'date'}), label='Срок выполнения (с)')
-    due_date_to = forms.DateField(required=False, widget=forms.TextInput(attrs={'type': 'date'}), label='Срок выполнения (по)')
+    status = forms.ChoiceField(required=False, choices=[('', 'Любой'), ('completed', 'Завершенные'),
+                                                        ('not_completed', 'Не завершенные')], label='Статус')
+    priority = forms.ChoiceField(required=False, choices=[('', 'Любой'), (1, 'Низкий'), (2, 'Средний'), (3, 'Высокий')],
+                                 label='Приоритет')
+    due_date_from = forms.DateField(required=False, widget=forms.TextInput(attrs={'type': 'date'}),
+                                    label='Срок выполнения (с)')
+    due_date_to = forms.DateField(required=False, widget=forms.TextInput(attrs={'type': 'date'}),
+                                  label='Срок выполнения (по)')

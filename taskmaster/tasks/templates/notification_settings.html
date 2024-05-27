@@ -1,0 +1,26 @@
+{% load custom_tags %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Настройки уведомлений</title>
+</head>
+<body>
+    <div id="notificationSettingsPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" onclick="closeNotificationSettings()">&times;</span>
+            <h2>Настройки уведомлений</h2>
+            <form id="notificationSettingsForm">
+                {% for notification_type, notification_label in notification_types %}
+                    <label>
+                        <input type="checkbox" name="notification_type" value="{{ notification_type }}" {% if notification_settings|get_item:notification_type %}checked{% endif %}>
+                        {{ notification_label }}
+                    </label><br>
+                {% endfor %}
+                <button type="button" onclick="saveNotificationSettings()">Сохранить</button>
+                <button type="button" onclick="closeNotificationSettings()">Отмена</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

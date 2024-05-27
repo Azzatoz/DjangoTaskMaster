@@ -20,17 +20,55 @@
     <div class="container {{ project.completed|yesno:'completed,incomplete' }}">
         <header>
             <nav>
-                <a href="{% url 'home' %}" class="btn">Назад к списку проектов</a>
+                <div class="user-info">
+                    <span>{{ request.user.username }}</span>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-logout">Выйти</button>
+                    </form>
+                </div>
             </nav>
         </header>
+
         <section class="project-info">
             <h1>Проект: {{ project.name }}</h1>
             <p>{{ project.description }}</p>
             <p><strong>Дата создания:</strong> {{ project.date_created }}</p>
             <p><strong>Обновлено:</strong> {{ project.updated_at }}</p>
         </section>
+
         <section class="tasks">
             <h2>Задачи</h2>
+            <ul>
+                {% for task in tasks %}
+                <li class="task-item">
+                    <button onclick="toggleDetails('{{ task.id }}')" class="task-title btn">
+                        {{ task.title }} - {{ task.due_date }} ↓
+                    </button>
+                    <div id="details-{{ task.id }}" class="task-details" style="display: none;">
+                        <p><strong>Описание:</strong> {{ task.description }}</p>
+                        <p><strong>Приоритет:</strong> {{ task.priority }}</p>
+                        <p><strong>Назначено:</strong> {{ task.assigned_to }}</p>
+                        <p><strong>Статус:</strong> {% if task.completed %}завершен{% else %}не завершен{% endif %}</p>
+                        <p><strong>Добавил:</strong> {{ task.created_by }}</p>
+                        <p><strong>Дата создания:</strong> {{ task.date_created }}</p>
+                        <p><strong>Обновлено:</strong> {{ task.updated_at }}</p>
+                        <a href="{% url 'edit_task' task.id %}" class="btn">Редактировать</a>
+                        <form method="post" action="{% url 'mark_task_completed' task.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">
+                                {% if task.completed %}Отметить как не выполненную{% else %}Отметить как выполненную{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% if not project.completed %}
+            <a href="{% url 'add_task' project.id %}" class="btn add-task">Добавить задачу</a>
+            {% else %}
+            <p>Проект завершен, добавление задач недоступно</p>
+            {% endif %}
             <form method="get" action=".">
                 <div class="form-group">
                     <label for="search">Поиск по названию:</label>
@@ -68,36 +106,6 @@
                     <button type="submit" class="btn btn-primary">Фильтровать</button>
                 </div>
             </form>
-            <ul>
-                {% for task in tasks %}
-                <li class="task-item">
-                    <button onclick="toggleDetails('{{ task.id }}')" class="task-title btn">
-                        {{ task.title }} - {{ task.due_date }} ↓
-                    </button>
-                    <div id="details-{{ task.id }}" class="task-details" style="display: none;">
-                        <p><strong>Описание:</strong> {{ task.description }}</p>
-                        <p><strong>Приоритет:</strong> {{ task.priority }}</p>
-                        <p><strong>Назначено:</strong> {{ task.assigned_to }}</p>
-                        <p><strong>Статус:</strong> {% if task.completed %}завершен{% else %}не завершен{% endif %}</p>
-                        <p><strong>Добавил:</strong> {{ task.created_by }}</p>
-                        <p><strong>Дата создания:</strong> {{ task.date_created }}</p>
-                        <p><strong>Обновлено:</strong> {{ task.updated_at }}</p>
-                        <a href="{% url 'edit_task' task.id %}" class="btn">Редактировать</a>
-                        <form method="post" action="{% url 'mark_task_completed' task.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn">
-                                {% if task.completed %}Отметить как не выполненную{% else %}Отметить как выполненную{% endif %}
-                            </button>
-                        </form>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-            {% if not project.completed %}
-            <a href="{% url 'add_task' project.id %}" class="btn add-task">Добавить задачу</a>
-            {% else %}
-            <p>Проект завершен, добавление задач недоступно</p>
-            {% endif %}
         </section>
         <section class="project-users">
             <h2>Участники</h2>
@@ -122,6 +130,9 @@
                     <option value="executor">Исполнитель</option>
                     <option value="moderator">Модератор</option>
                 </select>
+                {% if error_message %}
+                <div class="error-message">{{ error_message }}</div>
+                {% endif %}
                 <button type="submit" class="btn">Добавить</button>
             </form>
         </section>
@@ -133,6 +144,7 @@
                     {% if project.completed %}Отметить как не выполненный{% else %}Отметить проект как выполненный{% endif %}
                 </button>
             </form>
+            <a href="{% url 'home' %}" class="btn">Назад к списку проектов</a>
         </section>
     </div>
 </body>
